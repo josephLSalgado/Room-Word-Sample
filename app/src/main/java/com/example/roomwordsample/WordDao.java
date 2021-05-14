@@ -1,5 +1,6 @@
 package com.example.roomwordsample;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -23,5 +24,7 @@ public interface WordDao {
 
     // Obtiene todas las palabras ordenadas alfabéticamente
     @Query("SELECT * FROM word_table ORDER BY word ASC")
-    List<Word> getAlphabetizedWords();
+    LiveData<List<Word>> getAlphabetizedWords();
+    // Se agregó LiveData porque es un contenedor de datos observable, optimizado para ciclos de
+    // vida
 }
