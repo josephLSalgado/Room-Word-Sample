@@ -2,9 +2,11 @@ package com.example.roomwordsample;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,10 +31,31 @@ public abstract class WordRoomDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                             WordRoomDatabase.class, "word_database")
-                            .build();
+                            .addCallback(sRoomDatabaseCallback).build();
                 }
             }
         }
         return INSTANCE;
     }
+
+    private static RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
+        @Override
+        public void onCreate(@NonNull SupportSQLiteDatabase db) {
+            super.onCreate(db);
+
+            // Si se quiere mantener los datos a través del reinicio de la app,
+            // se comenta el siguiente bloque
+            databaseWriteExecutor.execute(() -> {
+                // Llena la base de datos
+                // Si se quiere empezar con más palabras, solo hay que agregarlas aquí
+                WordDao dao = INSTANCE.wordDao();
+                dao.deleteAll();
+
+                Word word = new Word("Hello");
+                dao.insert(word);
+                word = new Word("World");
+                dao.insert(word);
+            });
+        }
+    };
 }
